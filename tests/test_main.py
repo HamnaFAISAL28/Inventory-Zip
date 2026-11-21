@@ -31,6 +31,7 @@ def test_database_is_created_in_data_dir(tmp_path):
     run(tmp_path, "list")
     assert (tmp_path / "inventory.db").exists()
 
+
 def test_error_returns_nonzero(tmp_path, capsys):
     assert run(tmp_path, "sell", "PEN-001", "1") == 1
     assert "Error:" in capsys.readouterr().err
