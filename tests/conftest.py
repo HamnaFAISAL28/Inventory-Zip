@@ -25,4 +25,4 @@ def service(storage):
 @pytest.fixture
 def auth(monkeypatch):
     monkeypatch.setattr(AuthService, "ITERATIONS", 1_000)
-    return AuthService(admin_password="test-admin-pass")
+    return AuthService()
