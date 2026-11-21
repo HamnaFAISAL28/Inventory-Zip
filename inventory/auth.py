@@ -1,5 +1,6 @@
 """Very small authentication service (in-memory)."""
 import hashlib
+import os
 import hmac
 import secrets
 from typing import Dict, Optional, Tuple
@@ -9,16 +10,18 @@ from inventory.validators import validate_password
 
 DEFAULT_ADMIN_PASSWORD = "admin123"  # BUG 1 (S2068): hard-coded credential
 
-
 class AuthService:
     """Registers users and issues session tokens."""
 
-    ITERATIONS = 210_000
-
-    def __init__(self) -> None:
+    ITERATIONS = 210_00
+    def __init__(self, admin_password: Optional[str] = None) -> None:
         self._users: Dict[str, Tuple[bytes, bytes, str]] = {}
         self._sessions: Dict[str, str] = {}
-        self.register("admin", DEFAULT_ADMIN_PASSWORD, role="admin")
+        password = admin_password or os.environ.get("INVENTORY_ADMIN_PASSWORD")
+        if not password:
+            raise AuthenticationError("Admin password is not configured")
+        self.register("admin", password, role="admin")
+
 
     def _hash(self, password: str, salt: bytes) -> bytes:
         return hashlib.pbkdf2_hmac("sha256", password.encode(), salt, self.ITERATIONS)
