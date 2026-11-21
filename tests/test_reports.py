@@ -1,7 +1,9 @@
 import csv
 
-from inventory import reports
+import pytest
 
+from inventory import reports
+from inventory.exceptions import ValidationError
 
 def test_summary(service):
     stats = reports.summary(service.list_items())
@@ -34,9 +36,18 @@ def test_render_table(service):
 
 
 def test_export_csv(service, tmp_path):
-    path = tmp_path / "out.csv"
-    assert reports.export_csv(service.list_items(), str(path)) == 4
-    with open(path, newline="", encoding="utf-8") as handle:
+    assert reports.export_csv(service.list_items(), "out.csv", str(tmp_path)) == 4
+    with open(tmp_path / "out.csv", newline="", encoding="utf-8") as handle:
         rows = list(csv.DictReader(handle))
     assert rows[0]["sku"] == "BAG-100"
     assert len(rows) == 4
+
+
+def test_export_strips_directories(service, tmp_path):
+    reports.export_csv(service.list_items(), "../../evil.csv", str(tmp_path))
+    assert (tmp_path / "evil.csv").exists()
+
+
+def test_export_requires_csv(service, tmp_path):
+    with pytest.raises(ValidationError):
+        reports.export_csv(service.list_items(), "out.txt", str(tmp_path))
