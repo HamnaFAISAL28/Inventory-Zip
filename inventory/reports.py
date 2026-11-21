@@ -51,7 +51,13 @@ def render_table(items: List[Item]) -> str:
     return "\n".join(rows)
 
 
-def export_csv(items: List[Item], path: str) -> int:
+def export_csv(items: List[Item], filename: str, export_dir: str = "exports") -> int:
+    """Write items to <export_dir>/<filename>. Only a plain .csv file name is accepted."""
+    safe_name = os.path.basename(filename)
+    if not safe_name.endswith(".csv"):
+        raise ValidationError("Export file name must end with .csv")
+    os.makedirs(export_dir, exist_ok=True)
+    path = os.path.join(export_dir, safe_name)
     with open(path, "w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(
             handle, fieldnames=["sku", "name", "price", "quantity", "category"]
