@@ -4,7 +4,7 @@ from inventory.exceptions import AuthenticationError, ValidationError
 
 
 def test_admin_login(auth):
-    token = auth.login("admin", "admin123")
+    token = auth.login("admin", "test-admin-pass")
     assert auth.get_user(token) == "admin"
     assert auth.is_admin(token)
 
@@ -39,7 +39,7 @@ def test_weak_password_rejected(auth):
 
 
 def test_logout(auth):
-    token = auth.login("admin", "admin123")
+    token = auth.login("admin", "test-admin-pass")
     auth.logout(token)
     assert auth.get_user(token) is None
     assert not auth.is_admin(token)
