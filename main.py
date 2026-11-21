@@ -1,5 +1,6 @@
 """Command line entry point for the inventory app."""
 import argparse
+import os
 import sys
 from typing import List, Optional
 
@@ -15,10 +16,12 @@ from inventory.services import InventoryService
 from inventory.storage import Storage
 from inventory.utils import format_currency
 
+DATA_DIR = "data"
+
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="inventory")
-    parser.add_argument("--db", default="inventory.db", help="SQLite database path")
+    parser.add_argument("--db", default="inventory.db", help="database file name (stored in the data folder)")
     sub = parser.add_subparsers(dest="command", required=True)
 
     add = sub.add_parser("add", help="add a new item")
@@ -45,11 +48,11 @@ def build_parser() -> argparse.ArgumentParser:
     sub.add_parser("report", help="show inventory summary")
 
     export = sub.add_parser("export", help="export items to CSV")
-    export.add_argument("path")
+    export.add_argument("filename")
     return parser
 
 
-def run_command(args: argparse.Namespace, service: InventoryService) -> None:
+def run_command(args: argparse.Namespace, service: InventoryService, data_dir: str) -> None:
     if args.command == "add":
         item = service.add_item(args.sku, args.name, args.price, args.quantity, args.category)
         print(f"Added {item.sku} ({item.name})")
@@ -73,15 +76,17 @@ def run_command(args: argparse.Namespace, service: InventoryService) -> None:
         for line in low_stock_report(items):
             print(f"  LOW {line}")
     elif args.command == "export":
-        count = export_csv(service.list_items(), args.path)
-        print(f"Exported {count} items to {args.path}")
+        count = export_csv(service.list_items(), args.filename, os.path.join(data_dir, "exports"))
+        print(f"Exported {count} items to {os.path.basename(args.filename)}")
 
 
-def main(argv: Optional[List[str]] = None) -> int:
+def main(argv: Optional[List[str]] = None, data_dir: str = DATA_DIR) -> int:
     args = build_parser().parse_args(argv)
-    with Storage(args.db) as storage:
+    os.makedirs(data_dir, exist_ok=True)
+    db_path = os.path.join(data_dir, os.path.basename(args.db))
+    with Storage(db_path) as storage:
         try:
-            run_command(args, InventoryService(storage))
+            run_command(args, InventoryService(storage), data_dir)
         except InventoryError as exc:
             print(f"Error: {exc}", file=sys.stderr)
             return 1
