@@ -4,7 +4,7 @@ import re
 from inventory.exceptions import ValidationError
 
 SKU_PATTERN = re.compile(r"^[A-Z]{2,4}-\d{3,6}$")
-EMAIL_PATTERN = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+EMAIL_PATTERN = re.compile(r"^[^@\s]+@[^@\s.]+(\.[^@\s.]+)+$")
 MAX_PRICE = 1_000_000
 
 
