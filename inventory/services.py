@@ -78,7 +78,7 @@ class InventoryService:
     def inventory_value(self) -> float:
         return round(sum(item.total_value() for item in self.list_items()), 2)
 
-def discount_rate(self, tier: str) -> float:
+    def discount_rate(self, tier: str) -> float:
         rates = {"standard": 0.0, "silver": 0.10, "gold": 0.15, "platinum": 0.20}
         return rates.get(tier, 0.0)
 
