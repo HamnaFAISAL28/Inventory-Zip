@@ -22,7 +22,6 @@ class Storage:
     def __init__(self, db_path: str = ":memory:") -> None:
         self.db_path = db_path
         self._conn = sqlite3.connect(db_path)
-        self._conn.row_factory = sqlite3.Row
         self._conn.execute(SCHEMA)
         self._conn.commit()
 
@@ -33,14 +32,9 @@ class Storage:
         self.close()
 
     @staticmethod
-    def _row_to_item(row: sqlite3.Row) -> Item:
-        return Item(
-            sku=row["sku"],
-            name=row["name"],
-            price=row["price"],
-            quantity=row["quantity"],
-            category=row["category"],
-        )
+    def _row_to_item(row: tuple) -> Item:
+        sku, name, price, quantity, category = row
+        return Item(sku=sku, name=name, price=price, quantity=quantity, category=category)
 
     def add_item(self, item: Item) -> None:
         try:
@@ -53,21 +47,27 @@ class Storage:
             raise DuplicateItemError(item.sku) from exc
 
     def get_item(self, sku: str) -> Optional[Item]:
-        row = self._conn.execute("SELECT * FROM items WHERE sku = ?", (sku,)).fetchone()
+        row = self._conn.execute(
+            "SELECT sku, name, price, quantity, category FROM items WHERE sku = ?", (sku,)
+        ).fetchone()
         return self._row_to_item(row) if row else None
 
     def list_items(self, category: Optional[str] = None) -> List[Item]:
         if category:
             rows = self._conn.execute(
-                "SELECT * FROM items WHERE category = ? ORDER BY sku", (category,)
+                "SELECT sku, name, price, quantity, category FROM items WHERE category = ? ORDER BY sku",
+                (category,),
             ).fetchall()
         else:
-            rows = self._conn.execute("SELECT * FROM items ORDER BY sku").fetchall()
+            rows = self._conn.execute(
+                "SELECT sku, name, price, quantity, category FROM items ORDER BY sku"
+            ).fetchall()
         return [self._row_to_item(row) for row in rows]
 
     def search_by_name(self, term: str) -> List[Item]:
         rows = self._conn.execute(
-            "SELECT * FROM items WHERE name LIKE ? ORDER BY name", (f"%{term}%",)
+            "SELECT sku, name, price, quantity, category FROM items WHERE name LIKE ? ORDER BY name",
+            (f"%{term}%",),
         ).fetchall()
         return [self._row_to_item(row) for row in rows]
 
