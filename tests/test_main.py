@@ -2,7 +2,7 @@ import main
 
 
 def run(data_dir, *args):
-    return main.main(["--db", "cli.db", *args], data_dir=str(data_dir))
+    return main.main(list(args), data_dir=str(data_dir))
 
 
 def test_full_cli_flow(tmp_path, capsys):
@@ -27,10 +27,9 @@ def test_export_command(tmp_path, capsys):
     assert "Exported 1 items" in capsys.readouterr().out
 
 
-def test_db_name_cannot_escape_data_dir(tmp_path):
-    main.main(["--db", "../../escape.db", "list"], data_dir=str(tmp_path))
-    assert (tmp_path / "escape.db").exists()
-
+def test_database_is_created_in_data_dir(tmp_path):
+    run(tmp_path, "list")
+    assert (tmp_path / "inventory.db").exists()
 
 def test_error_returns_nonzero(tmp_path, capsys):
     assert run(tmp_path, "sell", "PEN-001", "1") == 1
