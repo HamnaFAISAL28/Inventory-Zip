@@ -17,11 +17,11 @@ from inventory.storage import Storage
 from inventory.utils import format_currency
 
 DATA_DIR = "data"
+DB_NAME = "inventory.db"
 
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="inventory")
-    parser.add_argument("--db", default="inventory.db", help="database file name (stored in the data folder)")
     sub = parser.add_subparsers(dest="command", required=True)
 
     add = sub.add_parser("add", help="add a new item")
@@ -83,7 +83,7 @@ def run_command(args: argparse.Namespace, service: InventoryService, data_dir: s
 def main(argv: Optional[List[str]] = None, data_dir: str = DATA_DIR) -> int:
     args = build_parser().parse_args(argv)
     os.makedirs(data_dir, exist_ok=True)
-    db_path = os.path.join(data_dir, os.path.basename(args.db))
+    db_path = os.path.join(data_dir, DB_NAME)
     with Storage(db_path) as storage:
         try:
             run_command(args, InventoryService(storage), data_dir)
