@@ -1,9 +1,12 @@
 import pytest
-
+import os
 from inventory.auth import AuthService
 from inventory.services import InventoryService
 from inventory.storage import Storage
 
+
+import os
+os.environ.setdefault("ADMIN_PASSWORD", "test-admin-pass")
 
 @pytest.fixture
 def storage():
