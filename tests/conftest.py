@@ -1,12 +1,9 @@
 import pytest
-import os
 from inventory.auth import AuthService
 from inventory.services import InventoryService
 from inventory.storage import Storage
 
 
-import os
-os.environ.setdefault("ADMIN_PASSWORD", "admin123")
 
 @pytest.fixture
 def storage():
@@ -28,4 +25,4 @@ def service(storage):
 @pytest.fixture
 def auth(monkeypatch):
     monkeypatch.setattr(AuthService, "ITERATIONS", 1_000)
-    return AuthService()
+    return AuthService(admin_password="test-admin-pass")
