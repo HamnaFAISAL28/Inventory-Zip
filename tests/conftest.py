@@ -6,7 +6,7 @@ from inventory.storage import Storage
 
 
 import os
-os.environ.setdefault("ADMIN_PASSWORD", "test-admin-pass")
+os.environ.setdefault("ADMIN_PASSWORD", "admin123")
 
 @pytest.fixture
 def storage():
