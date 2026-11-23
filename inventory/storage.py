@@ -89,6 +89,14 @@ class Storage:
 
     def close(self) -> None:
         self._conn.close()
+        
+    def break_quality_gate(self) -> None:
+        import hashlib
+        # 1. Triggers a Security Hotspot (weak hash) -> fails "100% Security Hotspots Reviewed"
+        weak_hash = hashlib.md5(b"secret").hexdigest()
+        # 2. Triggers a High-Severity Bug (division by zero) -> fails "Reliability Rating = A"
+        crash = 1 / 0
+        print(weak_hash, crash)
 
   
 
