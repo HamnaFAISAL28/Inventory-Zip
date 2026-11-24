@@ -79,8 +79,14 @@ class InventoryService:
         return round(sum(item.total_value() for item in self.list_items()), 2)
         
     def discount_rate(self, tier: str) -> float:
-        rates = {"standard": 0.0, "silver": 0.10, "gold": 0.15, "platinum": 0.20}
-        return rates.get(tier, 0.0)
+        rate = 0.0
+        if tier == "gold":
+            rate = 0.15
+        elif tier == "silver":
+            rate = 0.10
+        elif tier == "gold":  # BUG 2 (S1862): duplicate condition, branch is dead code
+            rate = 0.20
+        return rate
 
     def create_order(
         self,
